@@ -26,107 +26,18 @@ head(peaks_tidy)
 ```
 
 ```{r}
-dim(peaks_tidy)
-dim(exped_tidy)
-
-```
-
-```{r}
 merged_peaks <- exped_tidy %>% 
-  left_join(peaks_tidy)
-dim(merged_peaks)
+  left_join(peaks_tidy) %>% 
+  filter(!is.na(SMTTIME)) %>% 
+  filter(!is.na(PKNAME2))
 
 ```
 
 ```{r}
-peaks_w_smttime <- merged_peaks %>% 
-  filter(!is.na(SMTTIME))
-dim(peaks_w_smttime)
-
-test_peak <- peaks_w_smttime %>% 
-  group_by(PEAKID) %>% 
-  mutate(
-    min_value = min(SMTTIME),
-    max_value = max(SMTTIME))
-
-```
-
-```{r}
-quartile_peaks <- peaks_w_smttime %>% 
-  mutate(thirds = ntile(SMTTIME, 3)) %>% 
-  mutate(thirds = case_when(
-    thirds == 1 ~ "2145",
-    thirds == 2 ~ "0920",
-    thirds == 3 ~ "0015",
-  ))
-```
-
-```{r}
-peaks_w_smttime %>% 
-  ggplot(aes(x = SMTTIME, y = HEIGHTF, color = SUCCESS1)) +
-  geom_point()
-```
-
-```{r}
-ggplot(quartile_peaks, aes(x = PKNAME, y = HIGHPOINT)) +
+merged_peaks %>% 
+  ggplot(aes(x = PKNAME, y = HEIGHTF, color = SUCCESS1)) +
   geom_point() +
-  labs(x = "Peaks", y = "High Point of Peak") +
-  theme(axis.text.x = element_blank()) +
-  theme_minimal() +
-  facet_wrap(~thirds)
-  
-```
+  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1)) +
+  labs(x = "Peak Name", y = "Height in Feet", color = "Expedition Success", title = "Height vs Success in Hiking Himalayan Peaks") 
 
-```{r}
-pkname_peaks <- peaks_tidy %>% 
-  left_join(exped_tidy) %>% 
-  filter(!is.na(SUCCESS1)) 
-  
-head(pkname_peaks)
-
-
-pkname_peaks %>% 
-    count(PKNAME2) 
-
-```
-
-```{r}
-ggplot(pkname_peaks, aes(x = LOCATION, y = HEIGHTF, color = SUCCESS1)) +
-         geom_point() +
-        theme(axis.text.x = element_blank())
-```
-
-```{r}
-countTotalExps <- exped_tidy %>% 
-  group_by(PEAKID) %>% 
-  summarise(totalExps = n())
-
-peaksBySuccess <- exped_tidy %>% 
-  filter(SUCCESS1 == TRUE) %>% 
-  group_by(PEAKID, SUCCESS1) %>% 
-  summarise(succesfulSummits = n()) %>% 
-  right_join(countTotalExps) %>%
-  filter(totalExps > 10) %>% 
-  select(-SUCCESS1) %>% 
-  #Adding in the peak names via https://www.himalayandatabase.com/ 
-  mutate(PeakName = ifelse(PEAKID == "AMAD", "Ama Dablam",
-                    ifelse(PEAKID == "ANN1", "Annapurna I", 
-                    ifelse(PEAKID == "BARU", "Baruntse",
-                    ifelse(PEAKID == "CHOY", "Cho Oyu",
-                    ifelse(PEAKID == "DHA1", "Dhaulagiri I",
-                    ifelse(PEAKID == "EVER", "Everest",
-                    ifelse(PEAKID == "HIML", "Himlung Himal",
-                    ifelse(PEAKID == "KANG", "Kangchenjunga",
-                    ifelse(PEAKID == "LHOT", "Lhotse",
-                    ifelse(PEAKID == "MAKA", "Makalu",
-                    ifelse(PEAKID == "MANA", "Manaslu", "Pumori"))))))))))), 
-         rate = succesfulSummits / totalExps)
-```
-
-```{r}
-pkname_peaks %>% 
-  filter(!is.na(PKNAME)) %>% 
-ggplot(aes(x = PKNAME, y = HEIGHTF, color = SUCCESS1)) +
-         geom_point() +
-        theme(axis.text.x = element_blank())
 ```
