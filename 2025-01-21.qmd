@@ -1,0 +1,44 @@
+---
+title: "1.27.25TidyTuesday"
+format: html
+editor: visual
+---
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(viridis)
+```
+
+```{r}
+exped_tidy <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-01-21/exped_tidy.csv')
+peaks_tidy <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-01-21/peaks_tidy.csv')
+head(exped_tidy)
+head(peaks_tidy)
+```
+
+```{r}
+merged_peaks <- exped_tidy %>% 
+  left_join(peaks_tidy) %>% 
+  filter(!is.na(SMTTIME)) %>% 
+  filter(!is.na(PKNAME2)) %>% 
+  filter(!is.na(PKNAME))
+
+```
+
+```{r}
+merged_peaks %>% 
+  ggplot(aes(x = PKNAME, y = HEIGHTF, color = SUCCESS1)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1)) +
+  labs(x = "Peak Name", y = "Height in Feet", color = "Expedition Success", title = "Height vs Success in Hiking Himalayan Peaks") 
+
+```
