@@ -1,0 +1,42 @@
+---
+title: "2025-02-18"
+author: "Fiona Candland"
+format: html
+editor: visual
+---
+
+## Research Question:
+
+On the West Coast (California, Washington, and Oregon), are there similar trends among type and amount of agencies? Or does the binding of region have nothing to do with the agencies that different states implement?
+
+```{r}
+library(dplyr)
+library(tidyverse)
+```
+
+You can add options to executable code like this
+
+```{r}
+agencies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-02-18/agencies.csv')
+
+```
+
+```{r}
+agencies_n<-agencies %>% 
+  filter(!is.na(nibrs_start_date),
+         !is.na(agency_type)) %>% 
+  group_by(state) %>% 
+  count(agency_type) %>% 
+  filter(state %in% c("California", "Oregon", "Washington"))
+
+
+
+```
+
+```{r}
+ggplot(agencies_n, aes(x = n, fill = agency_type)) +
+  geom_histogram(binwidth = 30) +
+  facet_wrap(~ state) +
+  labs(x = "number of agencies", title = "Law Enforcement Agencies in The West Coast", fill = "Agency Type", y = "") +
+  theme_classic()
+```
